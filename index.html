@@ -266,8 +266,8 @@
     }
 
     addNode(x, y, r) {
-      let name = String.fromCharCode(65 + this.nameInd % 26) + ((this.nameInd > 26) ?
-        Math.floor(this.nameInd / 26) : "");
+      let name = String.fromCharCode(65 + this.nameInd % 26) + ((this.nameInd >= 26) ?
+        Math.floor(1 + this.nameInd / 26) : "");
 
       this.nameInd++;
       this.nodes.push(new Node(x, y, r, name));
@@ -320,13 +320,13 @@
     // show name
     if (graph.nodes.length <= 26) {
       ctx.fillStyle = '#fff';
-      ctx.font = '14px Arial';
+      ctx.font = '18px Arial';
       graph.nodes.forEach(node => {
-        ctx.fillText(node.name, node.x - 5, node.y + 5);
+        ctx.fillText(node.name, node.x - 7, node.y + 6);
       });
     } else {
       ctx.fillStyle = '#fff';
-      ctx.font = '13px Arial';
+      ctx.font = '18px Arial';
       graph.nodes.forEach(node => {
         ctx.fillText(node.name, node.x + 7, node.y + 17);
       });
@@ -358,15 +358,21 @@
     let k = 0.003;
     let nodeRadius = Math.sqrt(Math.pow(canvas.width, 2) * k / numNodes)
     graph.removeAll()
+    let realInd = 0;
     for (let i = 0; i < numNodes; i++) {
+      realInd ++;
       let x = randRange(nodeRadius, canvas.width - nodeRadius);
       let y = randRange(nodeRadius, canvas.height - nodeRadius);
       // check if node is too close to another node
       let tooClose = graph.nodes.some(node => {
         let dist = Math.sqrt(Math.pow(node.x - x, 2) + Math.pow(node.y - y, 2));
-        return dist < nodeRadius * 2;
+        return dist < nodeRadius * 4;
       });
       if (tooClose) {
+        if (realInd >= 10000) {
+          console.log('too many nodes');
+          break;
+        }
         i--;
         continue;
       }
@@ -413,6 +419,7 @@
       let age = ((R.length - 2) / graph.nodes.length) * 0.9;
       graph.addLink(bestEdge[0], bestEdge[1], age)
     }
+    steps.push(`No unconnected nodes remain, algorithm finished`);
     createSteps(steps);
   }
 
@@ -454,8 +461,8 @@
         }
 
       }
-      let treeOrForest1 = t1.length > 1 ? "forest" : "tree";
-      let treeOrForest2 = bestOtherForest.length > 1 ? "forest" : "tree";
+      let treeOrForest1 = t1.length > 1 ? "forest with" : "tree";
+      let treeOrForest2 = bestOtherForest.length > 1 ? "forest with" : "tree";
       t1.push(...bestOtherForest)
       trees.splice(trees.indexOf(bestOtherForest), 1)
       let age = ((graph.nodes.length - trees.length - 1) / graph.nodes.length) * 0.9;
@@ -464,6 +471,7 @@
 
 
     }
+    steps.push(`Final forest contains all ${graph.nodes.length} trees, algorithm finished`);
     createSteps(steps);
 
   }
