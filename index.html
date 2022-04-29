@@ -12,6 +12,7 @@
     .display-4 {
       font-size: 40px;
     }
+
     h2 {
       margin-top: 25px;
       margin-bottom: 15px;
@@ -49,7 +50,7 @@
       left: 0;
       width: 100%;
       height: 50px;
-      background-color: #f5f5f5;
+      background-color: #dbdbdb;
       text-align: center;
       display: flex;
       justify-content: center;
@@ -58,7 +59,61 @@
     }
 
     #footer a {
-      color: gray;
+      color: rgb(66, 66, 66);
+    }
+
+    #footer span {
+      color: rgb(75, 75, 75);
+    }
+
+    input[type=range]:hover {
+  opacity: 1;
+}
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 20px;
+      background: #d3d3d3;
+
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+    }
+
+    #step-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 35px;
+      border-radius: 5%;
+      background: rgb(255, 156, 27);
+      cursor: pointer;
+    }
+
+    #step-slider::-moz-range-thumb {
+      width: 25px;
+      height: 35px;
+      background: #0062ff;
+      cursor: pointer;
+    }
+
+    #numNodes::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 30px;
+      height: 30px;
+      background: #2945c0;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    #numNodes::-moz-range-thumb {
+      width: 30px;
+      height: 30px;
+      background: #0b259b;
+      border-radius: 50%;
+      cursor: pointer;
     }
   </style>
 
@@ -92,7 +147,7 @@
           <select class="form-control" id="algorithm" onchange="updateAlgorithmType()">
             <option default value="">Select</option>
             <option value="prim">Prim's</option>
-            <option value="boruvka">Boruvka's</option>
+            <option value="boruvka">Borůvka's</option>
           </select>
         </div>
       </div>
@@ -114,10 +169,10 @@
         </div>
         <!-- slider -->
         <div>
-        <input type="range" class="form-control-range" id="step-slider" min="0" max="10" value="0"
-          oninput="onStepSliderChange()">
-          <label for="step-slider">Step <span id="step-slider-number"></span></label>
-          </div>
+          <input type="range" class="form-control-range" id="step-slider" min="0" max="10" value="0"
+            oninput="onStepSliderChange()">
+          <label class="mt-2" for="step-slider">Step <span id="step-slider-number"></span></label>
+        </div>
 
       </div>
     </div>
@@ -144,8 +199,12 @@
     </div>
   </div>
 
-  <footer id="footer">
-    <a href="https://github.com/kqwq" target="_blank">Follow me</a>
+  <footer id="footer" class="mt-2">
+    <span>
+      <a href="https://github.com/kqwq/min-spanning-tree-v2">Source Code</a> -
+      <a href="https://github.com/kqwq" target="_blank">GitHub</a> -
+      <a href="https://www.linkedin.com/in/kqwq" target="_blank">LinkedIn</a>
+    </span>
   </footer>
 
 
@@ -302,6 +361,15 @@
     for (let i = 0; i < numNodes; i++) {
       let x = randRange(nodeRadius, canvas.width - nodeRadius);
       let y = randRange(nodeRadius, canvas.height - nodeRadius);
+      // check if node is too close to another node
+      let tooClose = graph.nodes.some(node => {
+        let dist = Math.sqrt(Math.pow(node.x - x, 2) + Math.pow(node.y - y, 2));
+        return dist < nodeRadius * 2;
+      });
+      if (tooClose) {
+        i--;
+        continue;
+      }
       graph.addNode(x, y, nodeRadius);
     }
     updateAlgorithmType();
@@ -441,6 +509,9 @@
       }
     });
     [...$('#step-list').children][stepIndex].classList.add('active');
+    // Scroll to the step
+    let topPos = $('#step-list').children[stepIndex].offsetTop;
+    $('#step-list').scrollTop = topPos - $('#step-list').offsetTop;
     $('#step-slider-number').innerHTML = stepIndex + 1;
     gotoStep(stepIndex);
   }
