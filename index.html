@@ -125,6 +125,7 @@
   <div id="main" class="container">
 
     <h1 class="mt-4 display-4">Minimum Spanning Tree</h1>
+    <small>by Kyle Wells</small>
     <h2>Settings</h2>
 
     <!-- 
@@ -176,16 +177,21 @@
 
       </div>
     </div>
-
+    <div class="row">
+      <h2>Explanation</h2>
+      <p>A minimum spanning tree is the minimum set of edges that connects a weighted <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)">graph</a>. Specifically, a minimum spanning tree is a solution to the set of edges where the total edge weight is as small as possible. In this example, the weights of nodes of our graph are the distances between 2 nodes. To show how each algorithm works, the node positions have been randomized.</p>
+      <p>Prim's algorithm works by choosing a starting node then adding the nearest node to the starting node. This forms a subset, defined <i>L</i>. Next, we add the edge e{a, b} such that a is in L and b is not in L. We repeat this process until we have a spanning tree. The algorithm's time complexity is O(n<sup>2</sup>), where n is the number of nodes in the graph.</p>
+      <p>Borůvka's algorithm starts by iterating through every node (tree), then merging it with the closest tree. Groups of trees (forests) are merged to form larger forests. This process is repeated until all forests are merged into one forest containing all the trees. This algorithn's outer loop runs at O(log n), where n is the number of nodes in the graph.</p>
+    </div>
     <div class="row">
       <h2>More Info</h2>
       <div class="col-md-12">
         <ul>
           <li>
-            <a href="https://en.wikipedia.org/wiki/Minimum_spanning_tree">Wikipedia</a>
+            <a href="https://en.wikipedia.org/wiki/Minimum_spanning_tree">Minimum spanning tree</a>
           </li>
           <li>
-            <a href="https://en.wikipedia.org/wiki/Prim%27s_algorithm">Prim's Algorithm</a>
+            <a href="https://en.wikipedia.org/wiki/Prim%27s_algorithm">Prim's algorithm</a>
           </li>
           <li>
             <a href="https://en.wikipedia.org/wiki/Bor%C5%AFvka%27s_algorithm">Borůvka's algorithm</a>
