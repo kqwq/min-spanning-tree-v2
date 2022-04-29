@@ -89,37 +89,67 @@
   const $ = x => document.querySelector(x);
   const $$ = x => document.querySelectorAll(x);
 
-  // OOP stuff
+    // OOP stuff
+
+  /**
+   * @class Link
+   * @param {Node} from
+   * @param {Node} to
+   * @param {number} age - from 0 to 1
+   * 
+   * Automatically adds nodes to each other's adjacency lists
+   */
+  class Link {
+    constructor(from, to, age) {
+      this.from = from;
+      this.to = to;
+      this.age = age;
+      from.adj.push(to);
+      to.adj.push(from);
+      let r1 = from.r;
+      let r2 = to.r;
+      let chX = (to.x - from.x)
+      let chY = (to.y - from.y)
+      let dist = Math.sqrt(chX * chX + chY * chY)
+      this.x1 = from.x + (r1 * chX) / dist
+      this.y1 = from.y + (r1 * chY) / dist
+      this.x2 = to.x - (r2 * chX) / dist
+      this.y2 = to.y - (r2 * chY) / dist
+    }
+  }
+
   class Node {
     constructor(x, y, r, name) {
       this.x = x;
       this.y = y;
       this.r = r;
       this.name = name;
-      this.links = [];
+      this.adj = [];
     }
   }
 
   class Graph {
     constructor() {
       this.nodes = [];
+      this.links = [];
       this.nameInd = 0;
     }
     removeAll() {
       this.nodes = [];
+      this.links = [];
       this.nameInd = 0;
     }
 
     addNode(x, y, r) {
       let name = String.fromCharCode(65 + this.nameInd % 26) + ((this.nameInd > 26) ?
         Math.floor(this.nameInd / 26) : "");
+      
       this.nameInd++;
       this.nodes.push(new Node(x, y, r, name));
     }
 
-    addLink(node1, node2) {
-      node1.links.push(node2);
-      node2.links.push(node1);
+    addLink(node1, node2, age) {
+      this.links.push(new Link(node1, node2, age));
     }
   }
 
@@ -133,36 +163,47 @@
   }
   const update = () => {
     // bg
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = '#111';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    
+    // show links
+    graph.links.forEach(link => {
+        let hue = link.age * 360;
+        ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.beginPath();
+        ctx.moveTo(link.x1, link.y1);
+        ctx.lineTo(link.x2, link.y2);
+        ctx.stroke();
+      
+    });
+
     // show nodes
-    ctx.fillStyle = '#ccc'; // node color
-    ctx.strokeStyle = '#000'; // node border color
+    ctx.fillStyle = '#444'; // node color
+    ctx.strokeStyle = '#999'; // node border color
     graph.nodes.forEach(node => {
       ctx.beginPath();
+      ctx.lineWidth = canvas.width / 400;
       ctx.arc(node.x, node.y, node.r, 0, 2 * Math.PI);
       ctx.fill();
       ctx.stroke();
     });
 
     // show name
-    ctx.fillStyle = '#000';
-    ctx.font = '12px Arial';
-    graph.nodes.forEach(node => {
-      ctx.fillText(node.name, node.x - 5, node.y + 5);
-    });
-
-    // show links
-    ctx.strokeStyle = '#f00';
-    graph.nodes.forEach(node => {
-      node.links.forEach(link => {
-        ctx.beginPath();
-        ctx.moveTo(node.x, node.y);
-        ctx.lineTo(link.x, link.y);
-        ctx.stroke();
+    if (graph.nodes.length <= 26) {
+      ctx.fillStyle = '#fff';
+      ctx.font = '12px Arial';
+      graph.nodes.forEach(node => {
+        ctx.fillText(node.name, node.x - 5, node.y + 5);
       });
-    });
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px Arial';
+      graph.nodes.forEach(node => {
+        ctx.fillText(node.name, node.x + 5, node.y + 15);
+      });
+    }
+
 
     requestAnimationFrame(update);
   }
@@ -186,7 +227,8 @@
     const numNodes = override || $('#numNodes').value;
     $('#num-nodes').innerText = numNodes;
     graph.nodes = [];
-    let nodeRadius = canvas.width * 0.25 / numNodes + 1;
+    let k = 0.003;
+    let nodeRadius = Math.sqrt(Math.pow(canvas.width, 2) * k / numNodes)
     graph.removeAll()
     for (let i = 0; i < numNodes; i++) {
       let x = randRange(nodeRadius, canvas.width - nodeRadius);
@@ -222,7 +264,9 @@
       L.splice(L.indexOf(bestEdge[1]), 1);
       let prettyDist = Math.sqrt(bestDistSq).toFixed(2);
       steps.push(`Select edge ${bestEdge[0].name} - ${bestEdge[1].name} with a distance of ${prettyDist}`);
-      graph.addLink(bestEdge[0], bestEdge[1]);
+      let age = ((R.length-2) / graph.nodes.length) * 0.9;
+      console.log(age)
+      graph.addLink(bestEdge[0], bestEdge[1], age)
     }
 
 
