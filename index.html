@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Min Spanning Tree</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
+    integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
+  <style>
+    body {}
+
+    canvas {
+      /* horizontal centering */
+
+
+      border: 1px solid black;
+    }
+
+    #step-list {
+      height: 200px;
+      overflow: auto;
+    }
+
+    .step-item {
+      display: block;
+      margin-right: 10px;
+    }
+  </style>
+
+
+</head>
+
+<body>
+
+  <div id="main" class="container">
+
+    <h1 class="mt-4">Min Spanning Tree</h1>
+    <h2>Settings</h2>
+
+    <!-- 
+- Range slider for number of nodes
+- Algorithm selection (Prim's / Boruvka's)
+
+   -->
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="numNodes">Number of Nodes</label>
+          <input type="range" class="form-control-range" id="numNodes" min="2" max="100" value="10"
+            oninput="updateNumNodes()">
+          <b id="num-nodes">10</b>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="algorithm">Algorithm</label>
+          <select class="form-control" id="algorithm" onchange="updateAlgorithm()">
+            <option default value="">Select</option>
+            <option value="prim">Prim's</option>
+            <option value="boruvka">Boruvka's</option>
+          </select>
+        </div>
+      </div>
+
+
+
+    </div>
+    <h2>Graph</h2>
+    <div class="row">
+      <canvas id="can"></canvas>
+
+    </div>
+
+    <div class="row">
+      <h2>Steps</h2>
+      <div class="col-md-12">
+        <div class="height-50" id="step-list">
+          <span class="step-item">Select an algorithm to begin</span>
+        </div>
+      </div>
+    </div>
+
+
+
+</body>
+<script>
+  const $ = x => document.querySelector(x);
+  const $$ = x => document.querySelectorAll(x);
+
+  // OOP stuff
+  class Node {
+    constructor(x, y, r, name) {
+      this.x = x;
+      this.y = y;
+      this.r = r;
+      this.name = name;
+      this.links = [];
+    }
+  }
+
+  class Graph {
+    constructor() {
+      this.nodes = [];
+      this.nameInd = 0;
+    }
+    removeAll() {
+      this.nodes = [];
+      this.nameInd = 0;
+    }
+
+    addNode(x, y, r) {
+      let name = String.fromCharCode(65 + this.nameInd % 26) + ((this.nameInd > 26) ?
+        Math.floor(this.nameInd / 26) : "");
+      this.nameInd++;
+      this.nodes.push(new Node(x, y, r, name));
+    }
+
+    addLink(node1, node2) {
+      node1.links.push(node2);
+      node2.links.push(node1);
+    }
+  }
+
+  const canvas = $('#can');
+  const ctx = canvas.getContext('2d');
+  const graph = new Graph();
+  const onResize = () => {
+    // take up 90% of the screen
+    canvas.width = window.innerWidth * 0.8;
+    canvas.height = window.innerWidth / 2;
+  }
+  const update = () => {
+    // bg
+    ctx.fillStyle = '#eee';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // show nodes
+    ctx.fillStyle = '#ccc'; // node color
+    ctx.strokeStyle = '#000'; // node border color
+    graph.nodes.forEach(node => {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, node.r, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    // show name
+    ctx.fillStyle = '#000';
+    ctx.font = '12px Arial';
+    graph.nodes.forEach(node => {
+      ctx.fillText(node.name, node.x - 5, node.y + 5);
+    });
+
+    // show links
+    ctx.strokeStyle = '#f00';
+    graph.nodes.forEach(node => {
+      node.links.forEach(link => {
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(link.x, link.y);
+        ctx.stroke();
+      });
+    });
+
+    requestAnimationFrame(update);
+  }
+  const init = () => {
+    onResize()
+    update();
+    updateNumNodes(10);
+
+    // debug code links
+    //graph.addLink(graph.nodes[0], graph.nodes[1]);
+  }
+
+  init()
+  window.addEventListener('resize', onResize);
+
+  function randRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function updateNumNodes(override) {
+    const numNodes = override || $('#numNodes').value;
+    $('#num-nodes').innerText = numNodes;
+    graph.nodes = [];
+    let nodeRadius = canvas.width * 0.25 / numNodes + 1;
+    graph.removeAll()
+    for (let i = 0; i < numNodes; i++) {
+      let x = randRange(nodeRadius, canvas.width - nodeRadius);
+      let y = randRange(nodeRadius, canvas.height - nodeRadius);
+      graph.addNode(x, y, nodeRadius);
+    }
+    
+  generatePrimsAlgorithmSteps(graph)
+  }
+
+  function generatePrimsAlgorithmSteps(graph) {
+    let steps = [];
+    let edgeHistory = [];
+
+
+    let R = [graph.nodes[0]]; // connected nodes
+    let L = graph.nodes.slice(1); // to be connected nodes
+    while (L.length > 0) {
+      let bestDistSq = Infinity;
+      let bestEdge = null;
+      for (let r of R) {
+        for (let l of L) {
+          if (r == l) continue;
+          let distSq = Math.pow(r.x - l.x, 2) + Math.pow(r.y - l.y, 2);
+          if (distSq < bestDistSq) {
+            bestDistSq = distSq;
+            bestEdge = [r, l];
+          }
+        }
+      }
+      edgeHistory.push(bestEdge);
+      R.push(bestEdge[1]);
+      L.splice(L.indexOf(bestEdge[1]), 1);
+      let prettyDist = Math.sqrt(bestDistSq).toFixed(2);
+      steps.push(`Select edge ${bestEdge[0].name} - ${bestEdge[1].name} with a distance of ${prettyDist}`);
+      graph.addLink(bestEdge[0], bestEdge[1]);
+    }
+
+
+
+    // Populate steps into the step list
+    const stepList = $('#step-list');
+    stepList.innerHTML = '';
+    steps.forEach(step => {
+      const stepItem = document.createElement('span');
+      stepItem.classList.add('step-item');
+      stepItem.innerText = step;
+      stepList.appendChild(stepItem);
+    });
+
+  }
+
+</script>
+
+</html>
