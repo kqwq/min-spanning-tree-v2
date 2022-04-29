@@ -180,8 +180,9 @@
     <div class="row">
       <h2>Explanation</h2>
       <p>A minimum spanning tree is the minimum set of edges that connects a weighted <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)">graph</a>. Specifically, a minimum spanning tree is a solution to the set of edges where the total edge weight is as small as possible. In this example, the weights of nodes of our graph are the distances between 2 nodes. To show how each algorithm works, the node positions have been randomized.</p>
-      <p>Prim's algorithm works by choosing a starting node then adding the nearest node to the starting node. This forms a subset, defined <i>L</i>. Next, we add the edge e{a, b} such that a is in L and b is not in L. We repeat this process until we have a spanning tree. The algorithm's time complexity is O(n<sup>2</sup>), where n is the number of nodes in the graph.</p>
-      <p>Borůvka's algorithm starts by iterating through every node (tree), then merging it with the closest tree. Groups of trees (forests) are merged to form larger forests. This process is repeated until all forests are merged into one forest containing all the trees. This algorithn's outer loop runs at O(log n), where n is the number of nodes in the graph.</p>
+      <p>Prim's algorithm works by choosing a starting node and adding it to an initially empty subset, defined <i>L</i>. Next, we add the edge e{<b>a</b>, <b>b</b>} such that <b>a</b> is a member of <i>L</i>, <b>b</b> is not a member of <i>L</i>, and the weight between <b>a</b> and <b>b</b> is minimized. Add <b>b</b> to <i>L</i>. We repeat this process until all nodes are connected. The algorithm's time complexity is O(n<sup>2</sup>), where n is the number of nodes in the graph.</p>
+      <p>Borůvka's algorithm starts by iterating through every node (a single tree), then merging it with the closest tree. Groups of trees (forests) are merged to form larger forests. This process is repeated until all forests are merged into one forest containing all the trees. This algorithm's outer loop runs at O(log n), where n is the number of nodes in the graph.</p>
+      <p>Nodes are the same as vertices.</p>
     </div>
     <div class="row">
       <h2>More Info</h2>
